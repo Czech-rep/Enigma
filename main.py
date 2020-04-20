@@ -6,26 +6,27 @@ def test1():
     EnigmaI =  ['EKMFLGDQVZNTOWYHXUSPAIBRCJ', 
                 'AJDKSIRUXBLHWTMCQGZNPYFVOE', 
                 'BDFHJLCPRTXVZNYEIWGAKMUSQO']
-           #'ABCDE'
-    aa = [  'BDAEC', 
-            'ECDBA']
+
+    Emachine = TheMachine()
+    Emachine.board.fill_dict('aq','fd','yt','gJ','bx','ne')
+    Emachine.barell.add_wheel(*EnigmaI)
 
 
-    EE = Barell()
-    wh = Wheel(EnigmaI[0])
-    EE + wh
-    
     # processed = EE.process('B')
-    a = EE.encrypt('alamaty')
-    print("machine proceses to: " + a )
-    EE.set_wheels()
-    print("machine proceses to: " + EE.encrypt(a) )
+    a = Emachine.encrypt('alamaty 5 adama')
+    print("machine proceses to: " + a + ' ' )
+    Emachine.barell.set_wheels(9,4,4)
+    print("machine reverses to: " + Emachine.encrypt(a) )
 
 
 def test2():
-    pass
+    code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+ 
+    return all( alfa.index(code[i]) == code.index(alfa[i]) for i in range(len(code)) )
 
 
 if __name__=="__main__":
-    test1()
-    print("     test ended")
+    a = test1()
+    print(a, "     test ended")

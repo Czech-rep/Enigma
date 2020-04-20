@@ -1,156 +1,207 @@
-import random
-
-class WheelScrambles(object):
-    '''
-    class for generating and storing patterns for wheel
-    its got 26 combinations
-    each combination is different replacement dictionary
-    '''
-    def __init__(self):
-        pass
-
 
 class CryptingElement(object):
     '''
-    class for implementing any crypting elements
-    every type has own scramble methos that generates dictionary with replacing letters
+    class for implementing any crypting elements based on rotors
+    it consists of code - string with information about letter replacement pattern
     '''
     _alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-    def __init__(self):
-        # self.
-        # self._replacement_dict = self.scramble()
-        pass
+    def __init__(self, code):   # takes a string 
+        # code - string representing letter replacement pattern
+        # must contain every letter of alphabet in uppercase
+        if 26 == len(set(code)) and all( let.isalpha() and let.isupper() for let in code ):
+            self._code = code
+        else:
+            raise WrongInput()
 
-class ReplacementSet():
-    '''
-    any element that outputs a scrambled letter
-    '''
 
+class Stator(CryptingElement):
+    '''
+    element on the end or beginning of block of wheels
+    connects letters in pairs and turns signal back to last wheel
+    its pattern is constant
+    '''
+    def __init__(self, code):   
+        # additional verification is conducted - is the code symmetric
+        if not all( self._alfa.index(code[i]) == code.index(self._alfa[i]) for i in range(len(code)) ):
+            raise WrongInput('code for stator not symmetric')
+        super().__init__(code)
+    
+    def output(self, letter):
+        return self._code[ self._alfa.index(letter) ]
 
 
 class Wheel(CryptingElement):
     '''
-    class represents encrypting wheel
-    its got 26 possible positions
-    each posiiton reprezents different letter replacement order
+    class handles encrypting wheel
+    its got 26 possible positions (0-25)
+    each posiiton represents different letter replacement order
     wheel will generate output for each letter
     '''
-    def __init__(self, code, position=0):
-        super().__init__()
-        assert 0 <= position <= 25
-        self._code = code
-        self._position = position
-        self._foreward = True
+    def __init__(self, code):
+        super().__init__(code)
+        self._position = 0
 
-    def _foreward_shift(self, letter):
-        index = self._position + self._alfa.index(letter)
-        if index > 25:
-            index -= 26
-        return self._alfa[index]
+    def get_position(self): return self._position
 
-    def _backward_shift(self, letter):
-        index = - self._position + self._alfa.index(letter)
-        if index < 0:
-            index += 26
-        return self._alfa[index]
+    def set_position(self, _desired):
+        assert str(_desired).isnumeric(), "invalid type"
+        assert 0 <= _desired <= 25, "invalid position"
+        while self._position != _desired:
+            self.click()
 
-    def click_wheel(self):
+    def click(self):
+        # function responsible for changing rotor position by one every step
+        # after completing full rotation function returns True
+        # this information is used by Barell method, for another wheel to move
+        self._code = self._code[-1] + self._code[:-1]
         self._position += 1
         if self._position > 25:
-            self._position = 0
+            self._position -= 26
             return True
         return False
-
-    def set_position(self, n):
-        assert 0 <= n <= 25, "invalid position"
-        self._position = n
-
-    def output(self, letter):
-        letter = self._retreive(letter)
-        return letter                             # klikniecie wywuluje maszyna
         
-    def _retreive(self, letter):
-        '''
-        function for replacing letters
-        letter always goes through two times: forewards and backwards
-        going foreward replaces from alfabet to own code
-        going backward replaces from code to alfabet
-        mind that rotation of wheel shifts relation of letters
-        '''
-        if self._foreward:
-            self._foreward = False
-            letter = self._foreward_shift(letter)
-            return self._code[ self._alfa.index(letter) ]
-        else:
-            self._foreward = True
-            letter = self._backward_shift(letter)
-            return self._alfa[ self._code.index(letter) ]
+    # depending on signal propagating forewards or backwards
+    # two functions are used, to retreive letter on code responding to letter from alphabet 
+    # or the opposite
+    def output_foreward(self, letter):
+        return self._code[ self._alfa.index(letter) ]
+
+    def output_backward(self, letter):
+        return self._alfa[ self._code.index(letter) ]
 
 
-
-
-class Barell(CryptingElement):
+class Barell(object):
     '''
     Group of wheels
     Letter goes througt them in two directions
     lets make elements a public list, so one can modify it and access members freely
     '''
-    elements = []
     def __init__(self, wall_code='RDOBJNTKVEHMLFCWZAXGYIPSUQ'):
         self.elements = []
-        self._wall_convol = self._create_wall(wall_code)
-
-    def _create_wall(self, wall_code):
-        # for i in range(len(wall_code)):
-            # assert wall_code[i] == wall_code[self._alfa.index(wall_code[i])], "invalid wall convolution"
-        return Wheel(wall_code, 0)
+        self._reflector = Stator(wall_code)
 
     def __add__(self, elem):
         if isinstance(elem, Wheel):
             self.elements.append(elem)
 
-    def set_wheels(self, sequence=None):
+    def add_wheel(self, *codes):
+        # function for adding rotors to Barrel unit
+        # provided with any number of codes will create Wheel objects and add them to Barell
+        for code in codes:
+            self.elements.append(Wheel(code))
+
+    def set_wheels(self, *sequence): 
+        # method for setting wheel positions
+        # call empty to set wheels to zeros
+        # otherwise provide input corresponding with count of wheels
         if None == sequence:
             for el in self.elements:
                 el.set_position(0)
+        elif len(sequence) == len(self.elements):
+            for el, n in zip(self.elements, sequence):
+                el.set_position(n)
+        else:
+            raise WrongInput()
+
+    def get_positions(self):
+        return [el.get_position() for el in self.elements]
         
     def _operation_click(self):
+        # function for modelling turning of wheels on every press of button
+        # the first rotor moves one step every round
+        # every another rotor does one step after previous rotor completed full rotation
         for el in self.elements:
-            if el.click_wheel() == False:
+            if el.click() == False:
                 break
 
+    # @encrypt(self, text)
     def output(self, letter):
+        self._operation_click()             # click occurs before crypting
+        # signal goes through set of wheels, than turnd back on stator and comes backwards througn wheels
+        for el in self.elements:
+            letter = el.output_foreward(letter)
+        letter = self._reflector.output(letter)
+        for el in self.elements[::-1]:
+            letter = el.output_backward(letter)
+        return letter
+    
+
+class PlugBoard(object):
+    '''
+    Class representing an electric board where any two letters can be connected by wire resulting with replacing them 
+    this element is symmetrical
+    '''
+    def __init__(self, *pairs):         
+        # accepts any number of pairs - 2-letter strings telling which letters to replace
+        self._replacement_dict = {}
+        self.fill_dict(*pairs)
+
+    def fill_dict(self, *pairs):
+        for pair in pairs:
+            self.create_pair(pair)
+
+    def create_pair(self, pair):            # each pair of added to dictionary
+        pair = pair.upper()
+        if len(pair) != 2 or pair[0] in self._replacement_dict or pair[1] in self._replacement_dict or pair[0] == pair[1]:
+            raise WrongInput
+        pair = pair.upper()
+        self._replacement_dict[pair[0]] = pair[1]
+        self._replacement_dict[pair[1]] = pair[0]
+
+    def output(self, letter):
+        return self._replacement_dict.get(letter, letter)
+
+
+class TheMachine(object):
+    '''
+    Class wrapping up all the elements
+    letter provided will pass through Plug Board, than Barell in both ways and again through Plug Board
+    class handles letters at upper and lower case 
+    characters other than letters is not encrypted
+    '''
+    def __init__(self,):
+        self.barell = Barell()
+        self.board = PlugBoard()
+
+    def output(self, letter):
+        if not letter.isalpha():            # trzeba bedzie wczesniej sprawdzac
+            return letter
         letter = letter.upper()
-        for el in (self.elements + [self._wall_convol] + self.elements[::-1]):
+        for el in (self.board, self.barell, self.board):
             letter = el.output(letter)
-        self._operation_click()
         return letter
 
     def encrypt(self, text):
         res = ''
         for let in text:
             res += self.output(let)
-        print(self.elements[0]._position)
         return res
+
     
 
+class WrongInput(Exception):
+    pass
 
 def test():
     pass#     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              #'RDOBJNTKVEHMLFCWZAXGYIPSUQ'
-    w = Wheel('EKMFLGDQVZNTOWYHXUSPAIBRCJ',0)
+    wh = Wheel('RDOBJNTKVEHMLFCWZAXGYIPSUQ')
+    wh1 = Wheel('RDOBJNTKVEHMLFCWZAXGYIPSUQ')
     qq = Barell()
-    qq + w
+    qq+wh
+    qq+wh1
+    # print(qq.get_positions())
+    # qq.set_wheels([2,2])
+    # print(qq.get_positions())
+    p_list = ['re','po']
+    bb = PlugBoard(*p_list)
+    bb.fill_dict('bv','kj')
+    bb.create_pair("as")
+    print(bb.output('P'))
 
-    print(qq.output('z'))
-    qq.set_wheels()
-    print(qq.output('a'))
 
 if __name__=="__main__":
-    # w = Wheel('EKMFLGDQVZNTOWYHXUSPAIBRCJ',0)
-    # qq = Barell()
-    # print(qq.R_wheel.crypt('z'))
     test()
 
     print(" finished")
