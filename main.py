@@ -1,8 +1,6 @@
 from code_func import *
 
-
 def test1():
-    letters =   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     EnigmaI =  ['EKMFLGDQVZNTOWYHXUSPAIBRCJ', 
                 'AJDKSIRUXBLHWTMCQGZNPYFVOE', 
                 'BDFHJLCPRTXVZNYEIWGAKMUSQO']
@@ -12,21 +10,35 @@ def test1():
     Emachine.barell.add_wheel(*EnigmaI)
 
 
-    # processed = EE.process('B')
-    a = Emachine.encrypt('alamaty 5 adama')
+    Emachine.barell.set_wheels(2,20,20)
+    print(Emachine.barell.get_positions())
+    a = Emachine.encrypt('alamaty 550 samoloty asaskjdaskafkwajf wakf wakfaw8wa fwakfjaw fkwaj fkwajkfjakwfjawkjfaskfj akwjf wkjf kwasj fkawsjfak sfwa')
+    print(Emachine.barell.get_positions())
     print("machine proceses to: " + a + ' ' )
-    Emachine.barell.set_wheels(9,4,4)
+
+    Emachine.barell.set_wheels(2,20,20)
     print("machine reverses to: " + Emachine.encrypt(a) )
 
 
 def test2():
-    code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
- 
-    return all( alfa.index(code[i]) == code.index(alfa[i]) for i in range(len(code)) )
+    def imienne(fun):
+        def pomocnicza(imie):
+            return fun() + imie
+        return pomocnicza
+
+    @imienne
+    def witaj():
+        return "witaj "
+    
+    # powitanie_adama = imienne(witaj,)
+    return witaj('adam')
+
+
+
+
+
 
 
 if __name__=="__main__":
-    a = test1()
-    print(a, "     test ended")
+    a = test2()
+    print( a, "     test ended")

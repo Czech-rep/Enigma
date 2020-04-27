@@ -1,4 +1,3 @@
-
 class CryptingElement(object):
     '''
     class for implementing any crypting elements based on rotors
@@ -6,6 +5,7 @@ class CryptingElement(object):
     '''
     _alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
     def __init__(self, code):   # takes a string 
         # code - string representing letter replacement pattern
         # must contain every letter of alphabet in uppercase
@@ -13,6 +13,8 @@ class CryptingElement(object):
             self._code = code
         else:
             raise WrongInput()
+    
+    def get_code(self): return self._code
 
 
 class Stator(CryptingElement):
@@ -91,16 +93,16 @@ class Barell(object):
         for code in codes:
             self.elements.append(Wheel(code))
 
-    def set_wheels(self, *sequence): 
+    def set_wheels(self, sequence=None): # czy to dobre rozwiazanie? czyli te funkcje uniwersalna
         # method for setting wheel positions
         # call empty to set wheels to zeros
         # otherwise provide input corresponding with count of wheels
-        if None == sequence:
+        if sequence == None:                                          # czy to dobre sprawdzenie ze wywolano pusta () ?
             for el in self.elements:
                 el.set_position(0)
         elif len(sequence) == len(self.elements):
             for el, n in zip(self.elements, sequence):
-                el.set_position(n)
+                el.set_position(int(n))
         else:
             raise WrongInput()
 
@@ -125,8 +127,8 @@ class Barell(object):
         for el in self.elements[::-1]:
             letter = el.output_backward(letter)
         return letter
+       
     
-
 class PlugBoard(object):
     '''
     Class representing an electric board where any two letters can be connected by wire resulting with replacing them 
@@ -141,7 +143,7 @@ class PlugBoard(object):
         for pair in pairs:
             self.create_pair(pair)
 
-    def create_pair(self, pair):            # each pair of added to dictionary
+    def create_pair(self, pair):            # each pair is added to dictionary
         pair = pair.upper()
         if len(pair) != 2 or pair[0] in self._replacement_dict or pair[1] in self._replacement_dict or pair[0] == pair[1]:
             raise WrongInput
@@ -152,33 +154,6 @@ class PlugBoard(object):
     def output(self, letter):
         return self._replacement_dict.get(letter, letter)
 
-
-class TheMachine(object):
-    '''
-    Class wrapping up all the elements
-    letter provided will pass through Plug Board, than Barell in both ways and again through Plug Board
-    class handles letters at upper and lower case 
-    characters other than letters is not encrypted
-    '''
-    def __init__(self,):
-        self.barell = Barell()
-        self.board = PlugBoard()
-
-    def output(self, letter):
-        if not letter.isalpha():            # trzeba bedzie wczesniej sprawdzac
-            return letter
-        letter = letter.upper()
-        for el in (self.board, self.barell, self.board):
-            letter = el.output(letter)
-        return letter
-
-    def encrypt(self, text):
-        res = ''
-        for let in text:
-            res += self.output(let)
-        return res
-
-    
 
 class WrongInput(Exception):
     pass
@@ -191,6 +166,7 @@ def test():
     qq = Barell()
     qq+wh
     qq+wh1
+    qq.set_wheels((3,3))
     # print(qq.get_positions())
     # qq.set_wheels([2,2])
     # print(qq.get_positions())
@@ -198,11 +174,12 @@ def test():
     bb = PlugBoard(*p_list)
     bb.fill_dict('bv','kj')
     bb.create_pair("as")
-    print(bb.output('P'))
+    print(bb.output('a'))
+    print(bb._replacement_dict)
+    print(qq.output('A'))
 
 
 if __name__=="__main__":
     test()
-
     print(" finished")
 
