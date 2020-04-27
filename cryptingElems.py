@@ -1,39 +1,38 @@
-class CryptingElement(object):
-    '''
-    class for implementing any crypting elements based on rotors
-    it consists of code - string with information about letter replacement pattern
-    '''
-    _alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-    def __init__(self, code):   # takes a string 
+_alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+def code_correct(code):
         # code - string representing letter replacement pattern
-        # must contain every letter of alphabet in uppercase
-        if 26 == len(set(code)) and all( let.isalpha() and let.isupper() for let in code ):
-            self._code = code
-        else:
-            raise WrongInput()
+    # must contain every letter of alphabet in uppercase
+    if 26 == len(set(code)) and all( let.isalpha() and let.isupper() for let in code ):
+       return code
+    raise WrongInput()
     
-    def get_code(self): return self._code
+# def get_code(self): return self._code
+
+def code_symmetric(code):
+    # additional verification is conducted - is the code symmetric
+    if all( _alfa.index(code[i]) == code.index(_alfa[i]) for i in range(len(code)) ):
+        return True
+    raise WrongInput('code for stator not symmetric')
 
 
-class Stator(CryptingElement):
+class Stator(object):
     '''
     element on the end or beginning of block of wheels
     connects letters in pairs and turns signal back to last wheel
     its pattern is constant
     '''
     def __init__(self, code):   
-        # additional verification is conducted - is the code symmetric
-        if not all( self._alfa.index(code[i]) == code.index(self._alfa[i]) for i in range(len(code)) ):
-            raise WrongInput('code for stator not symmetric')
-        super().__init__(code)
+        if code_correct(code) and code_symmetric(code):
+            self._code = code
     
     def output(self, letter):
-        return self._code[ self._alfa.index(letter) ]
+        return self._code[ _alfa.index(letter) ]
 
 
-class Wheel(CryptingElement):
+class Wheel(object):
     '''
     class handles encrypting wheel
     its got 26 possible positions (0-25)
@@ -41,8 +40,8 @@ class Wheel(CryptingElement):
     wheel will generate output for each letter
     '''
     def __init__(self, code):
-        super().__init__(code)
-        self._position = 0
+        self._code = code_correct(code)
+        self._position = 0 # default position is 0
 
     def get_position(self): return self._position
 
@@ -63,14 +62,14 @@ class Wheel(CryptingElement):
             return True
         return False
         
-    # depending on signal propagating forewards or backwards
+    # depending on signal propagating forwards or backwards
     # two functions are used, to retreive letter on code responding to letter from alphabet 
     # or the opposite
-    def output_foreward(self, letter):
-        return self._code[ self._alfa.index(letter) ]
+    def output_forward(self, letter):
+        return self._code[ _alfa.index(letter) ]
 
     def output_backward(self, letter):
-        return self._alfa[ self._code.index(letter) ]
+         return _alfa[ self._code.index(letter) ]
 
 
 class Barell(object):
@@ -83,21 +82,17 @@ class Barell(object):
         self.elements = []
         self._reflector = Stator(wall_code)
 
-    def __add__(self, elem):
-        if isinstance(elem, Wheel):
-            self.elements.append(elem)
-
     def add_wheel(self, *codes):
         # function for adding rotors to Barrel unit
         # provided with any number of codes will create Wheel objects and add them to Barell
         for code in codes:
             self.elements.append(Wheel(code))
 
-    def set_wheels(self, sequence=None): # czy to dobre rozwiazanie? czyli te funkcje uniwersalna
+    def set_wheels(self, sequence=None):
         # method for setting wheel positions
         # call empty to set wheels to zeros
         # otherwise provide input corresponding with count of wheels
-        if sequence == None:                                          # czy to dobre sprawdzenie ze wywolano pusta () ?
+        if sequence == None:                                         
             for el in self.elements:
                 el.set_position(0)
         elif len(sequence) == len(self.elements):
@@ -117,12 +112,11 @@ class Barell(object):
             if el.click() == False:
                 break
 
-    # @encrypt(self, text)
     def output(self, letter):
         self._operation_click()             # click occurs before crypting
         # signal goes through set of wheels, than turnd back on stator and comes backwards througn wheels
         for el in self.elements:
-            letter = el.output_foreward(letter)
+            letter = el.output_forward(letter)
         letter = self._reflector.output(letter)
         for el in self.elements[::-1]:
             letter = el.output_backward(letter)
@@ -137,13 +131,13 @@ class PlugBoard(object):
     def __init__(self, *pairs):         
         # accepts any number of pairs - 2-letter strings telling which letters to replace
         self._replacement_dict = {}
-        self.fill_dict(*pairs)
+        self._fill_dict(*pairs)
 
-    def fill_dict(self, *pairs):
+    def _fill_dict(self, *pairs):
         for pair in pairs:
-            self.create_pair(pair)
+            self._create_pair(pair)
 
-    def create_pair(self, pair):            # each pair is added to dictionary
+    def _create_pair(self, pair):            # each pair is added to dictionary
         pair = pair.upper()
         if len(pair) != 2 or pair[0] in self._replacement_dict or pair[1] in self._replacement_dict or pair[0] == pair[1]:
             raise WrongInput
@@ -164,19 +158,10 @@ def test():
     wh = Wheel('RDOBJNTKVEHMLFCWZAXGYIPSUQ')
     wh1 = Wheel('RDOBJNTKVEHMLFCWZAXGYIPSUQ')
     qq = Barell()
-    qq+wh
-    qq+wh1
-    qq.set_wheels((3,3))
-    # print(qq.get_positions())
-    # qq.set_wheels([2,2])
-    # print(qq.get_positions())
     p_list = ['re','po']
     bb = PlugBoard(*p_list)
-    bb.fill_dict('bv','kj')
-    bb.create_pair("as")
     print(bb.output('a'))
     print(bb._replacement_dict)
-    print(qq.output('A'))
 
 
 if __name__=="__main__":
