@@ -24,19 +24,18 @@ class TheMachine():
 
     def encrypt(self, text):
         # method for encrypting text
+        # imput can contain lower and uppercase letters, numbers characters and whitespaces
+        # machine encrypts letters and outputs in uppercase
+        # text formatting and other characters will be preserved
         res = ''
         for let in text:
             res += self.output(let)
         return res
 
     def get_params(self):
-        # method prints params of the machine
-        return f'''
-enigma machine codes:
-{ (', ').join(wh.get_code() for wh in self.barell.elements) }
-stator: 
-{ 5 }
-'''
+        # method returs a dict with machine assembly information
+        assert self.barell.elements 
+        return {'wheels': len(self.barell.elements), }
 
     def crypting_params(self):
         pass
@@ -67,7 +66,7 @@ stator:
     
     @staticmethod
     def get_code_from_book(no, filename):
-        # iterates through text file containing codes until desired number
+        # iterates through text file containing codes until reaching desired number
         assert len(filename) > 3
         if filename[-4:] != '.txt':
             filename += '.txt'
@@ -81,6 +80,7 @@ stator:
 
     @classmethod
     def setup_by_code(cls, code):
+        # creates machine according to certain code provided as argument
         code = [c.split(',') for c in code.split(';')[:-1] ] # tworzy liste stringow
         return cls.assemble_machine(*code)
 
@@ -100,7 +100,7 @@ def test():
 
 def test1():
 
-    a = TheMachine.get_code_from_book(120, 'codebook')
+    a = TheMachine.get_code_from_book(120, 'code_book')
     bb = TheMachine.setup_by_code(a)
     cc = TheMachine.setup_by_code(a)
     ms = bb.encrypt('alamaty --512')
@@ -113,4 +113,4 @@ def test2():
     Machine7.encrypt_file('to_decrypt')
 
 if __name__=="__main__":
-    test2()
+    test1()

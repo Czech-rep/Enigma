@@ -54,7 +54,7 @@ class Wheel(CryptingElement):
 
     def click(self):
         # function responsible for changing rotor position by one every step
-        # after completing full rotation function returns True
+        # after completing full rotation function returns True, normally False
         # this information is used by Barell method, for another wheel to move
         self._code = self._code[-1] + self._code[:-1]
         self._position += 1

@@ -1,12 +1,18 @@
 import random as random
 
 class CodeBook():
+    '''
+    class for generating a set of random machine settings
+    stored in a text file
+    assumes that machine consists of baress with 3 wheels (chosen from 5) and a plug board
+    '''
     wheels = [1, 2, 3, 4, 5]
     _alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
     @classmethod
-    def line(cls):
+    def line(cls): 
+        # function generates single code
         res = ''
         res += ','.join( str(e) for e in random.sample(cls.wheels, 3) )
         res += ';'
@@ -20,7 +26,9 @@ class CodeBook():
         return res
 
     @classmethod
-    def create(cls, filename, no=100, seed=None):
+    def create(cls, filename, no=100, seed=None): 
+        # function for creating whole codebook with no machine setups
+        # will be saved as filename.txt
         if filename[-4:] != '.txt':
             filename += '.txt'
         if seed:
