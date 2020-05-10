@@ -12,7 +12,7 @@ class TheMachine():
     def __init__(self, rotor_choice=None, rotor_pos=None, letters_plugged=None): # input: tuple(3), tupe(3), [list of letter pairs]
     # method configures machine according to parameters provided - returns machine object
     # rotor numbers and rotor positions - 3-element lists containing info about wheels to pick and set
-    # plug list - list of letters to connect on board
+    # plug list - list of letter pairs to connect on board
         self.barell = Barell(self.rotors_seq['stator'])
         self.board = PlugBoard()
         if rotor_choice is not None:
@@ -41,11 +41,6 @@ class TheMachine():
         # text formatting and other characters will be preserved
         return ''.join([ self.output(e) for e in text ])
 
-    # def get_params(self):
-    #     # method returs a dict with machine assembly information
-    #     assert self.barell.elements 
-    #     return {'wheels': len(self.barell.elements), }
-
     def encrypt_file(self, input, output=None):
         # method will encrypt text in file 
         # assumes that machine is already configured
@@ -59,54 +54,51 @@ class TheMachine():
 
 def setup_by_code(code):
     # returns TheMachine object configured according to certain code provided as argument
-    code = [c.split(',') for c in code.split(';')[:-1] ] # tworzy liste stringow
+    code = [c.split(',') for c in code[:-1] ] # tworzy liste stringow
     return TheMachine(*code)
 
-class FileNotFoundError(Exception):
+class CodeNotFoundError(Exception):
     pass
 
 def get_code_from_book(no, filename):
     # iterates through text file containing codes until reaching desired number
-    assert len(filename) > 3
-    if filename[-4:] != '.txt':
-        filename += '.txt'
     with open(filename, 'r') as fl:
         i = 0
         for line in fl:
-            if i == no:
-                return line
-            i += 1
-    raise FileNotFoundError()
+            print(line.split(';'))
+            if line.split(';')[0] == str(no):
+                return line.split(';')[1:]
+    raise CodeNotFoundError()
 
 
-def test():
-    starting_pos = (1,2,19)
-    Machine7 = TheMachine((3,2,4), starting_pos, ['ew','tr','vc'])
-    message = Machine7.encrypt('alamaty --512')
-    print(message)
-    Machine7.barell.set_wheels(starting_pos)
-    d_message = Machine7.encrypt(message)
-    print(d_message)
+# def test():
+#     starting_pos = (1,2,19)
+#     Machine7 = TheMachine((3,2,4), starting_pos, ['ew','tr','vc'])
+#     message = Machine7.encrypt('alamaty --512')
+#     print(message)
+#     Machine7.barell.set_wheels(starting_pos)
+#     d_message = Machine7.encrypt(message)
+#     print(d_message)
 
-def test1():
-    a = get_code_from_book(89, 'code_book')
-    bb = setup_by_code(a)
-    cc = setup_by_code(a)
-    ms = bb.encrypt('alamaty --512')
-    print(ms)
-    print(cc.encrypt(ms))
+# def test1():
+#     a = get_code_from_book(89, 'code_book')
+#     bb = setup_by_code(a)
+#     cc = setup_by_code(a)
+#     ms = bb.encrypt('alamaty --512')
+#     print(ms)
+#     print(cc.encrypt(ms))
 
-def test2():
-    a = get_code_from_book(3, 'code_book')
-    Machine7 = setup_by_code(a)
-    Machine7.encrypt_file('to_decrypt')
+# def test2():
+#     a = get_code_from_book(3, 'code_book')
+#     Machine7 = setup_by_code(a)
+#     Machine7.encrypt_file('to_decrypt')
 
-def test_empty():
-    a = TheMachine()
-    output = a.encrypt('alamaty --512')
-    print(output)
-    a.barell.set_wheels()
-    print(a.encrypt(output))
+# def test_empty():
+#     a = TheMachine()
+#     output = a.encrypt('alamaty --512')
+#     print(output)
+#     a.barell.set_wheels()
+#     print(a.encrypt(output))
 
 if __name__=="__main__":
     test()

@@ -1,4 +1,3 @@
-
 _alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
          'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
@@ -140,7 +139,7 @@ class PlugBoard(object):
     def _create_pair(self, pair):            # each pair is added to dictionary
         pair = pair.upper()
         if len(pair) != 2 or pair[0] in self._replacement_dict or pair[1] in self._replacement_dict or pair[0] == pair[1]:
-            raise WrongInput
+            raise WrongLetterPair
         pair = pair.upper()
         self._replacement_dict[pair[0]] = pair[1]
         self._replacement_dict[pair[1]] = pair[0]
@@ -150,6 +149,9 @@ class PlugBoard(object):
 
 
 class WrongInput(Exception):
+    pass
+
+class WrongLetterPair(WrongInput):
     pass
 
 def test():

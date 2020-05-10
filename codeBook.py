@@ -15,9 +15,9 @@ class CodeBook():
         self.c_book = self._create(no)
         if filename: self.save(filename)
 
-    def _line(self): 
+    def _line(self, _i): 
         # function generates single code
-        res = ''
+        res = str(_i) + ';'
         res += ','.join( str(e) for e in random.sample(self._wheels, 3) )
         res += ';'
         res += ','.join( str(random.randint(0, 25)) for _ in range(3) )
@@ -31,7 +31,7 @@ class CodeBook():
     def _create(self, no): 
         # function for creating whole codebook with no machine setups
         # will be saved as filename.txt
-        return [ self._line() for _ in range(no)]
+        return [ self._line(i) for i in range(1,1+no)]
 
     def save(self, filename):
         if filename[-4:] != '.txt':
