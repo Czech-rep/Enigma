@@ -1,0 +1,6 @@
+
+    # if letters_plugged is not None:
+        # if not (len(pair)==2 and not all( (isinstance(a, str) and a.upper() in _alfa) for a in pair) for pair in letters_plugged):
+        #     raise IncorrectInputValue('wrong letter pair') 
+
+

@@ -10,10 +10,10 @@ class CodeBook():
     _alfa = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-    def __init__(self, no=100, seed=None, filename=None):
+    def __init__(self, no=100, filename=None, seed=None):
         if seed: random.seed(seed)
         self.c_book = self._create(no)
-        if filename: self.save(filename)
+        self.save(filename) if filename else self.save('codebook')
 
     def _line(self, _i): 
         # function generates single code
@@ -34,13 +34,11 @@ class CodeBook():
         return [ self._line(i) for i in range(1,1+no)]
 
     def save(self, filename):
-        if filename[-4:] != '.txt':
-            filename += '.txt'
         with open(filename, 'w') as fl:
             for line in self.c_book:
                 print(line, file=fl)
 
 
 if __name__=="__main__":
-    CodeBook(seed='awdfwa312',filename='codebook2')
+    CodeBook()
 

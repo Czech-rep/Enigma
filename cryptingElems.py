@@ -6,7 +6,7 @@ def code_correct(code):
     # must contain every letter of alphabet in uppercase
     if 26 == len(set(code)) and all( let.isalpha() and let.isupper() for let in code ):
        return code
-    raise WrongInput()
+    raise WrongInput('error in code') # raczej nie będę go łapał ----------------------
     
 # def get_code(self): return self._code
 
@@ -45,8 +45,8 @@ class Wheel(object):
     def get_position(self): return self._position
 
     def set_position(self, _desired):
-        assert str(_desired).isnumeric(), "invalid type"
-        assert 0 <= _desired <= 25, "invalid position"
+        if not ( 0 <= _desired <= 25 ):
+            raise PositionInputError('position must be in range 0:25')
         while self._position != _desired:
             self.click()
 
@@ -87,18 +87,17 @@ class Barell(object):
         for code in codes:
             self.elements.append(Wheel(code))
 
-    def set_wheels(self, sequence=None):
+    def set_wheels(self, sequence):
         # method for setting wheel positions
-        # call empty to set wheels to zeros
-        # otherwise provide input corresponding with count of wheels
-        if sequence == None:                                         
-            for el in self.elements:
-                el.set_position(0)
-        elif len(sequence) == len(self.elements):
+        if len(sequence) != 3:
+            raise PositionInputError('there are 3 rotors')
+        try:
             for el, n in zip(self.elements, sequence):
-                el.set_position(int(n))
-        else:
-            raise WrongInput()
+                    el.set_position(int(n))
+        except PositionInputError as e:
+            raise e
+        except:                                                     # yeach thats an empty exception
+            raise PositionInputError('invalid position value')
 
     def get_positions(self):
         return [el.get_position() for el in self.elements]
@@ -137,9 +136,11 @@ class PlugBoard(object):
             self._create_pair(pair)
 
     def _create_pair(self, pair):            # each pair is added to dictionary
+        if not isinstance(pair, str):
+            raise WrongLetterPair('wrong type')
         pair = pair.upper()
         if len(pair) != 2 or pair[0] in self._replacement_dict or pair[1] in self._replacement_dict or pair[0] == pair[1]:
-            raise WrongLetterPair
+            raise WrongLetterPair('provide letter pairs, none of letters may duplicate')
         pair = pair.upper()
         self._replacement_dict[pair[0]] = pair[1]
         self._replacement_dict[pair[1]] = pair[0]
@@ -151,8 +152,12 @@ class PlugBoard(object):
 class WrongInput(Exception):
     pass
 
-class WrongLetterPair(WrongInput):
+class PositionInputError(WrongInput): # for exceptions in Barell / set_wheels method
     pass
+
+class WrongLetterPair(WrongInput): # for exceptions in PlugBoard
+    pass
+
 
 def test():
     pass#     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

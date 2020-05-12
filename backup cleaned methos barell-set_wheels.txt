@@ -1,0 +1,12 @@
+    def set_wheels(self, sequence=None):
+        # method for setting wheel positions
+        # call empty to set wheels to zeros
+        # otherwise provide input corresponding with count of wheels
+        if sequence == None:                                         
+            for el in self.elements:
+                el.set_position(0)
+        elif len(sequence) == 3:
+            for el, n in zip(self.elements, sequence):
+                el.set_position(int(n))
+        else:
+            raise WrongInput()
